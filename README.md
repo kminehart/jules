@@ -119,10 +119,10 @@ Runs one of the 4 stages.  If no other options are specified, then `joules` will
 * `joules lint`
 If no config is specified, `joules` will look for a `joules.toml`, and it will output any problems that it finds with it.
 
-* `joules [COMMAND] -c [CONFIG]`, joules [COMMAND] --config=CONFIG]`
+* `joules [COMMAND] -c [CONFIG]`, `joules [COMMAND] --config=[CONFIG]`
 `joules` will run the command with the specified configuration.
 
-* `joules [COMMAND] -l=[debug|info|warning|error]`, oules [COMMAND] --log-level=[debug|info|warning|error]`
+* `joules [COMMAND] -l [debug|info|warning|error]`, `joules [COMMAND] --log-level=[debug|info|warning|error]`
 `joules` will provide output at a specific level.  The defailt level is `info`.
 
 * `joules -s [COMMAND]`, `joules --stage=[COMMAND]`
