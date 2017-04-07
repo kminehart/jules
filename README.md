@@ -24,6 +24,10 @@ For a list of commands, see [#commands](#commands).
 
 ### Step 1:  Configure your project
 
+In the root of your repository:
+
+`joules.toml`
+
 ```toml
 
 # The commands to run to configure, build, test, and deploy a project.
@@ -115,11 +119,14 @@ Runs one of the 4 stages.  If no other options are specified, then `joules` will
 * `joules lint`
 If no config is specified, `joules` will look for a `joules.toml`, and it will output any problems that it finds with it.
 
-* `joules [COMMAND] --config=[CONFIG]`
+* `joules [COMMAND] -c [CONFIG]`, joules [COMMAND] --config=CONFIG]`
 `joules` will run the command with the specified configuration.
 
-* `joules [COMMAND] --log-level=[debug|info|warning|error]`
+* `joules [COMMAND] -l=[debug|info|warning|error]`, oules [COMMAND] --log-level=[debug|info|warning|error]`
 `joules` will provide output at a specific level.  The defailt level is `info`.
 
-* `joules -c [COMMAND]`
+* `joules -s [COMMAND]`, `joules --stage=[COMMAND]`
 `joules` will run your custom command.
+
+* `joules [COMMAND] -d`, `joules --diffs`
+If ran in a valid `git` repository, `joules` will only run the specified stage on projects that were modified in the last commit. 
