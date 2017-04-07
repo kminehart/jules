@@ -114,10 +114,14 @@ deploy_production:
 # Commands
 
 ```
-joules [configure|build|test|deploy]
+joules [configure|build|test|deploy] [PROJECT]
 ```
 
-Runs one of the 4 stages.  If no other options are specified, then `joules` will look for a `joules.toml`. If it exists, then it will run the specified stage on all of the projects listed.
+Runs one of the 4 stages.  If no config is specified, then `joules` will look for a `joules.toml`. 
+
+If it exists, then it will run the specified stage on all of the projects listed.
+
+If `[PROJECT]` is provided, then `joules` will run on the specified project.
 
 ```
 joules lint
