@@ -1,4 +1,4 @@
-# joules
+# jules
 A pretty basic build system for repositories with multiple projects.
 
 _for best results, use with Docker_
@@ -9,11 +9,11 @@ _for best results, use with Docker_
 
 ### Before you begin
 
-By default, there's 4 actions that `joules` will do:
+By default, there's 4 actions that `jules` will do:
 
-_Note that commands ran in these stages are at the working directory specified in your `joules` config._
+_Note that commands ran in these stages are at the working directory specified in your `jules` config._
 
-To run them, run `joules [COMMAND]`:
+To run them, run `jules [COMMAND]`:
 
 1. configure
 2. build
@@ -26,7 +26,7 @@ For a list of commands, see [#commands](#commands).
 
 In the root of your repository:
 
-`joules.toml`
+`jules.toml`
 
 ```toml
 
@@ -68,7 +68,7 @@ language: go
 
 ```yml
 # Use the Debian Jessie image for that package manager
-image: joules:jessie-slim
+image: jules:jessie-slim
 
 stages:
   - configure
@@ -79,23 +79,23 @@ stages:
 configure:
   stage: configure
   script:
-    - joules configure
+    - jules configure
     
 build:
   stage: build
   script:
-    - joules build
+    - jules build
     
 test:
   stage: test
   script:
-    - joules test
+    - jules test
 
 # You can also specify a custom config file!
 deploy_staging:
   stage: deploy
   script:
-    - joules deploy --config=joules.staging.toml
+    - jules deploy --config=jules.staging.toml
   only:
     - development
 
@@ -103,8 +103,8 @@ deploy_staging:
 deploy_production:
   stage: deploy
   script:
-    - joules deploy
-    - joules -c deploy_docker
+    - jules deploy
+    - jules -c deploy_docker
   only:
     - master
 ```
@@ -114,41 +114,41 @@ deploy_production:
 # Commands
 
 ```
-joules [configure|build|test|deploy] [PROJECT]
+jules [configure|build|test|deploy] [PROJECT]
 ```
 
-Runs one of the 4 stages.  If no config is specified, then `joules` will look for a `joules.toml`. 
+Runs one of the 4 stages.  If no config is specified, then `jules` will look for a `jules.toml`. 
 
 If it exists, then it will run the specified stage on all of the projects listed.
 
-If `[PROJECT]` is provided, then `joules` will run on the specified project.
+If `[PROJECT]` is provided, then `jules` will run on the specified project.
 
 ```
-joules lint
+jules lint
 ```
 
-If no config is specified, `joules` will look for a `joules.toml`, and it will output any problems that it finds with it.
+If no config is specified, `jules` will look for a `jules.toml`, and it will output any problems that it finds with it.
 
 ```
-joules [COMMAND] -c [CONFIG], joules [COMMAND] --config=[CONFIG]
+jules [COMMAND] -c [CONFIG], jules [COMMAND] --config=[CONFIG]
 ```
 
-`joules` will run the command with the specified configuration.
+`jules` will run the command with the specified configuration.
 
 ```
-joules [COMMAND] -l [debug|info|warning|error]`, `joules [COMMAND] --log-level=[debug|info|warning|error]
+jules [COMMAND] -l [debug|info|warning|error]`, `jules [COMMAND] --log-level=[debug|info|warning|error]
 ```
 
-`joules` will provide output at a specific level.  The defailt level is `info`.
+`jules` will provide output at a specific level.  The defailt level is `info`.
 
 ```
-joules -s [STAGE]`, `joules --stage=[STAGE]
+jules -s [STAGE]`, `jules --stage=[STAGE]
 ```
 
-`joules` will run your custom command.
+`jules` will run your custom command.
 
 ```
-joules [COMMAND] -d`, `joules --diffs
+jules [COMMAND] -d`, `jules --diffs
 ```
 
-If ran in a valid `git` repository, `joules` will only run the specified stage on projects that were modified in the last commit. 
+If ran in a valid `git` repository, `jules` will only run the specified stage on projects that were modified in the last commit. 
