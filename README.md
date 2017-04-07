@@ -13,13 +13,12 @@ By default, there's 4 actions that `joules` will do:
 
 _Note that commands ran in these stages are at the working directory specified in the config below._
 
-#### 1. configure
+To run them, run `joules [COMMAND]`:
 
-#### 2. build
-
-#### 3. test
-
-#### 4. deploy
+1. configure
+2. build
+3. test
+4. deploy
 
 For a list of commands, see [#commands](#commands).
 
