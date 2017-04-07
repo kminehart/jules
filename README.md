@@ -11,7 +11,7 @@ _for best results, use with Docker_
 
 By default, there's 4 actions that `joules` will do:
 
-_Note that commands ran in these stages are at the working directory specified in the config below._
+_Note that commands ran in these stages are at the working directory specified in your `joules` config._
 
 To run them, run `joules [COMMAND]`:
 
@@ -113,20 +113,26 @@ deploy_production:
 
 # Commands
 
-* `joules configure`, `joules build`, `joules test`, `joules deploy`
+* `joules [configure|build|test|deploy]`
+
 Runs one of the 4 stages.  If no other options are specified, then `joules` will look for a `joules.toml`. If it exists, then it will run the specified stage on all of the projects listed.
 
 * `joules lint`
+
 If no config is specified, `joules` will look for a `joules.toml`, and it will output any problems that it finds with it.
 
 * `joules [COMMAND] -c [CONFIG]`, `joules [COMMAND] --config=[CONFIG]`
+
 `joules` will run the command with the specified configuration.
 
 * `joules [COMMAND] -l [debug|info|warning|error]`, `joules [COMMAND] --log-level=[debug|info|warning|error]`
+
 `joules` will provide output at a specific level.  The defailt level is `info`.
 
-* `joules -s [COMMAND]`, `joules --stage=[COMMAND]`
+* `joules -s [STAGE]`, `joules --stage=[STAGE]`
+
 `joules` will run your custom command.
 
 * `joules [COMMAND] -d`, `joules --diffs`
+
 If ran in a valid `git` repository, `joules` will only run the specified stage on projects that were modified in the last commit. 
