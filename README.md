@@ -114,7 +114,7 @@ deploy_production:
 # Commands
 
 ```
-jules [configure|build|test|deploy] [PROJECT]
+jules [all:default|configure|build|test|deploy] [PROJECT ...]
 ```
 
 Runs one of the 4 stages.  If no config is specified, then `jules` will look for a `jules.toml`. 
@@ -123,6 +123,8 @@ If it exists, then it will run the specified stage on all of the projects listed
 
 If `[PROJECT]` is provided, then `jules` will run on the specified project.
 
+If you want to run your own custom stage, run `jules --stage="my_custom_stage"`.
+
 ```
 jules lint
 ```
@@ -130,25 +132,46 @@ jules lint
 If no config is specified, `jules` will look for a `jules.toml`, and it will output any problems that it finds with it.
 
 ```
-jules [COMMAND] -c [CONFIG], jules [COMMAND] --config=[CONFIG]
+jules [COMMAND] -config=[CONFIG]
 ```
 
 `jules` will run the command with the specified configuration.
 
 ```
-jules [COMMAND] -l [debug|info|warning|error]`, `jules [COMMAND] --log-level=[debug|info|warning|error]
+jules [COMMAND] -log-level=[debug|info|warning|error]
 ```
 
 `jules` will provide output at a specific level.  The defailt level is `info`.
 
 ```
-jules -s [STAGE]`, `jules --stage=[STAGE]
+jules -stage=[STAGE]
 ```
 
 `jules` will run your custom command.
 
 ```
-jules [COMMAND] -d`, `jules --diffs
+jules -diffs
 ```
 
 If ran in a valid `git` repository, `jules` will only run the specified stage on projects that were modified in the last commit. 
+
+# License
+
+```
+    This file is part of "jules".
+
+    "jules" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    "jules" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with "jules".  If not, see <http://www.gnu.org/licenses/>.
+```
+
+The full GPLv3 can be read [here](LICENSE).
