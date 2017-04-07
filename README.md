@@ -30,12 +30,12 @@ For a list of commands, see [#commands](#commands).
 configure = "go get -d -v"
 build = "go build $j"
 test = "go test ./..."
-deploy = "./deploy.sh'
+deploy = "./deploy.sh"
 
 # You can also specify custom commands.
 [custom]
-deploy_staging = './deploy_staging.sh'
-deploy_docker = './deploy_docker.sh'
+deploy_staging = "./deploy_staging.sh"
+deploy_docker = "./deploy_docker.sh"
 
 [[projects]]
 # Note:  name must be unique.
