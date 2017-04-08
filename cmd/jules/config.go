@@ -26,14 +26,12 @@ var Configuration Config
 
 const (
 	defaultConfigPath = "jules.toml"
-	defaultLogLevel   = "info"
 	defaultDiffs      = false
 )
 
 // Command-line Arguments
 var (
 	configPath string // -config
-	logLevel   string // -logLevel
 	stage      string // -stage
 	diffs      bool   // -diffs
 )
@@ -59,7 +57,6 @@ type Config struct {
 
 func initArguments() {
 	flag.StringVar(&configPath, "config", defaultConfigPath, "-config will specify a custom config file.")
-	flag.StringVar(&logLevel, "log-level", defaultLogLevel, "-log-level controls the verbosity of the output.  Options: \"debug\", \"info\"(default), \"warn\", and \"error\".")
 	flag.StringVar(&stage, "stage", "", "-stage will specify a custom stage to run.")
 	flag.BoolVar(&diffs, "diffs", false, "If in a valid git repository, -diffs will run a stage only on projects that have been changed.")
 

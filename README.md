@@ -138,12 +138,6 @@ jules [COMMAND] -config=[CONFIG]
 `jules` will run the command with the specified configuration.
 
 ```
-jules [COMMAND] -log-level=[debug|info|warning|error]
-```
-
-`jules` will provide output at a specific level.  The defailt level is `info`.
-
-```
 jules -stage=[STAGE]
 ```
 
