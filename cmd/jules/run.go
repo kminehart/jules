@@ -53,6 +53,7 @@ func GetCommand(stage *Stage, project *Project, conf *Config) (*exec.Cmd, error)
 
 	cmd := exec.Command(command[0], command[1:]...)
 	cmd.Env = project.Env
+	cmd.Dir = project.Path
 	return cmd, nil
 }
 
@@ -98,5 +99,6 @@ func GetCommandFromStrings(stage string, project string, conf *Config) (*exec.Cm
 	}
 	cmd := exec.Command(command[0], command[1:]...)
 	cmd.Env = p.Env
+	cmd.Dir = p.Path
 	return cmd, nil
 }

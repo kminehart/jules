@@ -18,11 +18,17 @@ package main
 import (
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 )
 
 func init() {
 	log.SetOutput(os.Stdout)
+}
+
+func execute(cmd *exec.Cmd) error {
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
 
 func main() {
@@ -56,9 +62,14 @@ func main() {
 					log.Printf("Running stage %s on project %s.\n", v.Name, p.Name)
 					cmd, err := GetCommand(&v, &p, conf)
 					if err != nil {
-						log.Fatalf(err.Error())
+						log.Fatal(err.Error())
 					}
-					log.Printf("%+v\n", cmd)
+
+					err = execute(cmd)
+
+					if err != nil {
+						log.Fatal(err.Error())
+					}
 				}
 			} else {
 				// Run all stages on specified projects
@@ -68,10 +79,16 @@ func main() {
 					if err != nil {
 						log.Fatal(err.Error())
 					}
-					log.Printf("%+v\n", cmd)
+
+					err = execute(cmd)
+
+					if err != nil {
+						log.Fatal(err.Error())
+					}
 				}
 			}
 		}
+		return
 	}
 
 	if len(args.Projects) != 0 {
@@ -81,7 +98,12 @@ func main() {
 			if err != nil {
 				log.Fatal(err.Error())
 			}
-			log.Printf("%+v\n", cmd)
+
+			err = execute(cmd)
+
+			if err != nil {
+				log.Fatal(err.Error())
+			}
 		}
 		return
 	}
@@ -92,7 +114,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		log.Printf("%+v\n", cmd)
+
+		err = execute(cmd)
+
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 	}
 
 }
