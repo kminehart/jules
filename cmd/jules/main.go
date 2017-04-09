@@ -18,6 +18,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 )
 
 func init() {
@@ -25,25 +26,73 @@ func init() {
 }
 
 func main() {
-	var action string
-	if len(os.Args) == 1 {
-		action = "all"
-	} else {
-		action = os.Args[1]
+	args := GetArguments()
+
+	conf, err := ReadConfig(args.ConfigPath)
+
+	if err != nil {
+		log.Fatal(err.Error())
 	}
 
-	// These actions require that they be run without checking the config
-	switch action {
-	case "lint":
-		lint()
-		return
-	case "help":
-		help()
-		return
-	default:
-		initConfig()
+	// Lint?
+	for _, v := range os.Args {
+		if strings.ToLower(v) == "lint" {
+			lint(conf)
+			return
+		}
+		if strings.ToLower(v) == "help" {
+			help()
+			return
+		}
 	}
 
-	// These actions require that they be run with a valid config
-	run(action)
+	if args.Stage == "all" {
+		for _, v := range conf.Stages {
+			log.Printf("Running stage %s.\n", v.Name)
+
+			// The user did not specify any projects.
+			if len(args.Projects) == 0 {
+				for _, p := range conf.Projects {
+					log.Printf("Running stage %s on project %s.\n", v.Name, p.Name)
+					cmd, err := GetCommand(&v, &p, conf)
+					if err != nil {
+						log.Fatalf(err.Error())
+					}
+					log.Printf("%+v\n", cmd)
+				}
+			} else {
+				// Run all stages on specified projects
+				for _, p := range args.Projects {
+					log.Printf("Running stage %s on project %s.\n", v.Name, p)
+					cmd, err := GetCommandFromStrings(v.Name, p, conf)
+					if err != nil {
+						log.Fatal(err.Error())
+					}
+					log.Printf("%+v\n", cmd)
+				}
+			}
+		}
+	}
+
+	if len(args.Projects) != 0 {
+		for _, v := range args.Projects {
+			log.Printf("Running stage %s on project %s.\n", args.Stage, v)
+			cmd, err := GetCommandFromStrings(args.Stage, v, conf)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+			log.Printf("%+v\n", cmd)
+		}
+		return
+	}
+
+	for _, v := range conf.Projects {
+		log.Printf("Running stage %s on project %s.\n", args.Stage, v.Name)
+		cmd, err := GetCommandFromStrings(args.Stage, v.Name, conf)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		log.Printf("%+v\n", cmd)
+	}
+
 }

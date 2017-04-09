@@ -17,8 +17,55 @@ package main
 
 import (
 	"log"
+	"strings"
 )
 
-func lint() {
-	log.Println("lint!")
+func lintStage(i int, v *Stage) {
+	if strings.TrimSpace(v.Name) == "" {
+		log.Printf("On stage index %d, the name is empty or is only whitespace.\n", i)
+	}
+
+	if len(v.Command) == 0 {
+		log.Printf("On stage index %d, the command array has no members.\n", i)
+	} else {
+		if strings.Contains(v.Command[0], " ") {
+			log.Printf("On stage index %d, the first command element has a space. (It definitely won't work). Separate each argument as different members in the array.  \"make test --name=test\" becomes [\"make\", \"test\", \"--name\", \"test\"]\n", i)
+		}
+	}
+}
+
+func lintProject(i int, p *Project) {
+	if strings.TrimSpace(p.Name) == "" {
+		log.Printf("On project index %d, the name is empty or is only whitespace.\n", i)
+	}
+
+	if strings.TrimSpace(p.Path) == "" {
+		log.Printf("On project index %d, the name is empty or is only whitespace.\n", i)
+	}
+
+	if p.Path[0] == '/' {
+		log.Printf("On project index %d, the path is absolute.\n", i)
+	}
+
+	for ii, v := range p.Env {
+		if strings.Contains(v, "=") != true {
+			log.Printf("On project index %d, environment variable index %d, the environment variable does not contain a '='.\n", i, ii)
+		}
+	}
+
+	for ii, v := range p.Stages {
+		lintStage(ii, &v)
+	}
+}
+
+// The lint function will print warnings if the desired configuration has any possible issues.
+func lint(conf *Config) {
+	log.Printf("The following problems were found:\n")
+	for i, v := range conf.Stages {
+		lintStage(i, &v)
+	}
+
+	for i, v := range conf.Projects {
+		lintProject(i, &v)
+	}
 }

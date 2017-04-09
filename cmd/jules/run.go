@@ -16,9 +16,87 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"os/exec"
+	"strings"
 )
 
-func run(action string) {
-	log.Printf("run action: %s\n", action)
+func GetCommand(stage *Stage, project *Project, conf *Config) (*exec.Cmd, error) {
+	if stage == nil {
+		return nil, fmt.Errorf("You can not provide a nil stage.\n")
+	}
+	if project == nil {
+		return nil, fmt.Errorf("You can not provide a nil project.\n")
+	}
+	if conf == nil {
+		return nil, fmt.Errorf("You can not provide a nil config.\n")
+	}
+
+	var (
+		command []string
+	)
+	n := strings.ToLower(stage.Name)
+	for _, v := range project.Stages {
+		if strings.ToLower(v.Name) == n {
+			command = v.Command
+			break
+		}
+	}
+
+	if len(command) == 0 {
+		command = stage.Command
+	}
+
+	if len(command) == 0 {
+		return nil, fmt.Errorf("Could not find a suitable command. Please check your config file.\n")
+	}
+
+	cmd := exec.Command(command[0], command[1:]...)
+	cmd.Env = project.Env
+	return cmd, nil
+}
+
+func GetCommandFromStrings(stage string, project string, conf *Config) (*exec.Cmd, error) {
+	if conf == nil {
+		return nil, fmt.Errorf("You can not provide a nil config.\n")
+	}
+
+	var (
+		command []string
+		p       *Project
+	)
+
+	// Step 1:  See if the project has the stage.
+	project = strings.ToLower(project)
+	for i, v := range conf.Projects {
+		if strings.ToLower(v.Name) == project {
+			p = &conf.Projects[i]
+			for _, s := range v.Stages {
+				if s.Name == stage {
+					command = s.Command
+					break
+				}
+			}
+		}
+	}
+
+	if p == nil {
+		return nil, fmt.Errorf("%s is not a project found in the provided config.", project)
+	}
+
+	// The project didn't have the command
+	if len(command) == 0 {
+		for _, s := range conf.Stages {
+			if s.Name == stage {
+				command = s.Command
+			}
+		}
+	}
+
+	if len(command) == 0 {
+		return nil, fmt.Errorf("Could not find a suitable command. Please check your config file.\n")
+	}
+	cmd := exec.Command(command[0], command[1:]...)
+	cmd.Env = p.Env
+	return cmd, nil
 }

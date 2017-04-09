@@ -16,9 +16,10 @@
 package main
 
 import (
-	"log"
+	"flag"
+	//"log"
 )
 
 func help() {
-	log.Println("help!")
+	flag.Usage()
 }
