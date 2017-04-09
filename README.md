@@ -3,22 +3,28 @@ A pretty basic build system for repositories with multiple projects.
 
 _for best results, use with Docker_
 
+# Progress
+* [x] -config
+* [] -stage
+  * [x] Custom stages in project file.
+  * [] Execute the script specified.
+  * [] Test environment variables
+* [x] -lint
+* [x] -help
+
 # Install
+
+```
+go get github.com/kminehart/jules/cmd/jules
+```
 
 # Usage
 
 ### Before you begin
 
-By default, there's 4 actions that `jules` will do:
-
 _Note that commands ran in these stages are at the working directory specified in your `jules` config._
 
-To run them, run `jules [COMMAND]`:
-
-1. configure
-2. build
-3. test
-4. deploy
+To run a stage, run `jules -stage=[COMMAND]`:
 
 For a list of commands, see [#commands](#commands).
 
@@ -26,35 +32,48 @@ For a list of commands, see [#commands](#commands).
 
 In the root of your repository:
 
-`jules.toml`
+`jules.yaml`
 
-```toml
+```yaml
+# Each stage can be ran with 'jules -stage [STAGE]'
+stages:
+  - name: configure
+    # The 'command' value can be configured with an array (like a Dockerfile)
+    # Or with standard yaml syntax (below)
+    command: ["make", "configure"]
+  - name: build
+    command: ["make", "build"]
+  - name: test
+    command: ["make", "test"]
+  - name: benchmark
+    command: ["make", "benchmark"]
+  - name: deploy_staging
+    command: ["make", "deploy_staging"]
+  - name: deploy_docker
+    # Or you can just use normal yaml syntax
+    command: 
+      - make
+      - deploy_docker
+  - name: deploy
+    command: ["make", "deploy"]
 
-# The commands to run to configure, build, test, and deploy a project.
-configure = "go get -d -v"
-build = "go build $j"
-test = "go test ./..."
-deploy = "./deploy.sh"
-
-# You can also specify custom commands.
-[custom]
-deploy_staging = "./deploy_staging.sh"
-deploy_docker = "./deploy_docker.sh"
-
-[[projects]]
-# Note:  name must be unique.
-name = "project1"
-path = "pkg/core/project1-frontend"
-# You can also modify the 4 stages for specifc projects
-configure = "npm install"
-build = "webpack"
-test = "npm run test"
-deploy = "npm run deploy"
-
-
-[[projects]]
-name = "project2"
-path = "pkg/core/project2"
+# Each project will have these stages ran on it.
+projects:
+  - name: test1
+    # Prefer relative paths to absolute paths.
+    # I won't stop you from using absolute paths if you want to do that though.
+    path: "path/to/project1"
+    # You can also tell jules to do something different for the defined stages for this project.
+    stages:
+      - name: configure
+        command: ["npm", "configure"]
+    env:
+      # This is technically a []string it just looks like a map.
+      - ENV_PROJECT1=value
+  - name: test2
+    path: "./path/to/project2"
+    # Or JSON syntax.
+    env: ["ENV_PROJECT2=value"]
 ```
 
 ### Step 2:  Configure your CI
@@ -79,23 +98,23 @@ stages:
 configure:
   stage: configure
   script:
-    - jules configure
+    - jules -stage=configure
     
 build:
   stage: build
   script:
-    - jules build
+    - jules -stage=build
     
 test:
   stage: test
   script:
-    - jules test
+    - jules -stage=test
 
 # You can also specify a custom config file!
 deploy_staging:
   stage: deploy
   script:
-    - jules deploy --config=jules.staging.toml
+    - jules -stage=deploy -config=jules.staging.toml
   only:
     - development
 
@@ -103,8 +122,8 @@ deploy_staging:
 deploy_production:
   stage: deploy
   script:
-    - jules deploy
-    - jules -c deploy_docker
+    - jules -stage=deploy
+    - jules -stage=deploy_docker
   only:
     - master
 ```
@@ -114,16 +133,18 @@ deploy_production:
 # Commands
 
 ```
-jules [all:default|configure|build|test|deploy] [PROJECT ...]
+jules [all:default|configure|build|test|deploy]
 ```
 
-Runs one of the 4 stages.  If no config is specified, then `jules` will look for a `jules.toml`. 
+Runs a defined stage.
 
-If it exists, then it will run the specified stage on all of the projects listed.
+If no stage is defined, then `jules` will run all of the specified stages in the order listed in the config.
 
-If `[PROJECT]` is provided, then `jules` will run on the specified project.
+If no config is specified, then `jules` will look for a `jules.toml`. 
 
-If you want to run your own custom stage, run `jules --stage="my_custom_stage"`.
+If a jules.toml exists, then it will run the specified stage on all of the projects listed.
+
+If `-project` is provided, then `jules` will run on the specified project(s).
 
 ```
 jules lint
@@ -132,19 +153,19 @@ jules lint
 If no config is specified, `jules` will look for a `jules.toml`, and it will output any problems that it finds with it.
 
 ```
-jules [COMMAND] -config=[CONFIG]
+jules -stage=[STAGE]  -config=[CONFIG]
 ```
 
-`jules` will run the command with the specified configuration.
+`jules` will run the stage on the specified configuration.
 
 ```
-jules -stage=[STAGE]
+jules -stage=[STAGE] -project=[PROJECT1,PROJECT2...]
 ```
 
-`jules` will run your custom command.
+`jules` will run the command on the specified project(s).
 
 ```
-jules -diffs
+jules -stage=[STAGE] -diffs
 ```
 
 If ran in a valid `git` repository, `jules` will only run the specified stage on projects that were modified in the last commit. 
