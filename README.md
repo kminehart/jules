@@ -5,10 +5,10 @@ _for best results, use with Docker_
 
 # Progress
 * [x] -config
-* [] -stage
+* [ ] -stage
   * [x] Custom stages in project file.
-  * [] Execute the script specified.
-  * [] Test environment variables
+  * [ ] Execute the script specified.
+  * [ ] Test environment variables
 * [x] -lint
 * [x] -help
 
