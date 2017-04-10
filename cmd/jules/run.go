@@ -21,6 +21,7 @@ import (
 	"strings"
 )
 
+// GetCommand will return an "os/exec" command based on the stage, project, and configuration provided.
 func GetCommand(stage string, project string, conf *Config) (*exec.Cmd, error) {
 	if conf == nil {
 		return nil, fmt.Errorf("You can not provide a nil config.\n")

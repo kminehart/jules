@@ -23,19 +23,19 @@ import (
 	"strings"
 )
 
-var Configuration *Config
-
 const (
 	defaultConfigPath = "jules.yaml"
 	defaultDiffs      = false
 	defaultStage      = "all"
 )
 
+// A stage is a single stage defined in the config.  A stage basically runs a command on your projects.
 type Stage struct {
 	Name    string   `yaml:"name"`
 	Command []string `yaml:"command"`
 }
 
+// Each project is essentially a filepath where a stage command is run.
 type Project struct {
 	Name   string   `yaml:"name"`
 	Path   string   `yaml:"path"`
@@ -43,11 +43,13 @@ type Project struct {
 	Env    []string `yaml:"env"`
 }
 
+// The Config type defines the structure of the yaml configuration file.
 type Config struct {
 	Stages   []Stage   `yaml:"stages"`
 	Projects []Project `yaml:"projects"`
 }
 
+// Arguments are arguments passed to the binary.
 type Arguments struct {
 	ConfigPath string
 	Diffs      bool
@@ -55,6 +57,7 @@ type Arguments struct {
 	Projects   []string
 }
 
+// GetArguments uses the "flag" package to parse the command line arguments.
 func GetArguments() *Arguments {
 	// Command-line Arguments
 	var (
@@ -83,6 +86,7 @@ func GetArguments() *Arguments {
 	}
 }
 
+// ReadConfig will open a filepath and return a Config object.
 func ReadConfig(path string) (c *Config, err error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -96,6 +100,7 @@ func ReadConfig(path string) (c *Config, err error) {
 	return config, nil
 }
 
+// ReadConfigString will read a string and return a Config object.
 func ReadConfigString(conf string) (c *Config, err error) {
 	config := &Config{}
 	if err = yaml.Unmarshal([]byte(conf), config); err != nil {
