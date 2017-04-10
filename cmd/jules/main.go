@@ -16,6 +16,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/exec"
@@ -31,33 +32,20 @@ func execute(cmd *exec.Cmd) error {
 	return cmd.Run()
 }
 
-func runAll(conf *Config, args *Arguments) error {
-	projects := args.Projects
+func run(stage string, projects []string, conf *Config, args *Arguments) error {
+	for _, p := range projects {
+		cmd, err := GetCommand(stage, p, conf)
 
-	if len(args.Projects) == 0 {
-		projects = make([]string, len(conf.Projects))
-		for i, v := range conf.Projects {
-			projects[i] = v.Name
+		if err != nil {
+			return err
+		}
+
+		err = execute(cmd)
+		if err != nil {
+			return err
 		}
 	}
 
-	// For each stage defined in the configuration
-	for _, v := range conf.Stages {
-		log.Printf("Running stage %s.\n", v.Name)
-		for _, p := range projects {
-			log.Printf("Running stage %s on project %s.\n", v.Name, p)
-			cmd, err := GetCommand(v.Name, p, conf)
-			if err != nil {
-				return err
-			}
-
-			err = execute(cmd)
-
-			if err != nil {
-				return err
-			}
-		}
-	}
 	return nil
 }
 
@@ -65,6 +53,11 @@ func main() {
 	args := GetArguments()
 
 	conf, err := ReadConfig(args.ConfigPath)
+
+	if args.Stage == "" {
+		flag.Usage()
+		return
+	}
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -82,42 +75,43 @@ func main() {
 		}
 	}
 
-	if args.Stage == "all" {
-		err = runAll(conf, args)
-		if err != nil {
-			log.Fatal(err.Error())
+	projects := args.Projects
+
+	// If no projects were specified, then use all of them
+	if len(args.Projects) == 0 {
+		i := 0
+		projects = make([]string, len(conf.Projects))
+		for k, _ := range conf.Projects {
+			projects[i] = k
+			i++
 		}
-		return
 	}
 
-	if len(args.Projects) != 0 {
-		for _, v := range args.Projects {
-			log.Printf("Running stage %s on project %s.\n", args.Stage, v)
-			cmd, err := GetCommand(args.Stage, v, conf)
-			if err != nil {
-				log.Fatal(err.Error())
+	// If the user provided the "-diffs" flag, find the projects with changes.
+	if args.Diffs != "" {
+		for i, v := range projects {
+			if val, ok := conf.Projects[v]; ok {
+				isDifferent, err := ExecuteDiff(GetDiffCommand(val.Path, args.Diffs))
+				if err != nil {
+					log.Fatalf("Something went wrong when trying to git diff.  Do you have `git` installed? Error: %s\n", err.Error())
+				}
+
+				// If there was no diff found for this project.
+				if isDifferent != true {
+					if len(projects) == 1 {
+						log.Fatalf("No projects were found with diffs against the branch %s\n", args.Diffs)
+					}
+					// Remove thprojectst elemnet
+					projects[i] = projects[len(projects)-1]
+					projects = projects[:len(projects)-1]
+				}
 			}
-
-			err = execute(cmd)
-
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-		}
-		return
-	}
-
-	for _, v := range conf.Projects {
-		log.Printf("Running stage %s on project %s.\n", args.Stage, v.Name)
-		cmd, err := GetCommand(args.Stage, v.Name, conf)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-
-		err = execute(cmd)
-
-		if err != nil {
-			log.Fatal(err.Error())
 		}
 	}
+
+	err = run(args.Stage, projects, conf, args)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	return
 }
