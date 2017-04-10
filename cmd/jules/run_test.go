@@ -70,7 +70,7 @@ func TestRun(t *testing.T) {
 	}
 
 	// stage, project, config
-	cmd, err := GetCommandString("test", "test1", conf)
+	cmd, err := GetCommandFromStrings("test", "test1", conf)
 
 	if err != nil {
 		t.Error(err)
@@ -87,7 +87,7 @@ func TestRun(t *testing.T) {
 	}
 
 	// This project overrides a stage
-	cmd, err = GetCommandString("configure", "test1", conf)
+	cmd, err = GetCommandFromStrings("configure", "test1", conf)
 	path, _ = exec.LookPath("npm")
 	if cmd.Path != path {
 		t.Errorf("%s != %s", cmd.Path, path)
@@ -97,19 +97,19 @@ func TestRun(t *testing.T) {
 	}
 
 	// A project that doesn't exist
-	cmd, err = GetCommandString("test", "non_existent", conf)
+	cmd, err = GetCommandFromStrings("test", "non_existent", conf)
 	if err == nil {
 		t.Fail()
 	}
 
 	// A stage that doesn't exist
-	cmd, err = GetCommandString("non_existent", "test1", conf)
+	cmd, err = GetCommandFromStrings("non_existent", "test1", conf)
 	if err == nil {
 		t.Fail()
 	}
 
 	// A nil config
-	cmd, err = GetCommandString("build", "test1", nil)
+	cmd, err = GetCommandFromStrings("build", "test1", nil)
 	if err == nil {
 		t.Fail()
 	}
