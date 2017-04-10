@@ -20,52 +20,52 @@ import (
 	"strings"
 )
 
-func lintStage(i int, v *Stage) {
-	if strings.TrimSpace(v.Name) == "" {
-		log.Printf("On stage index %d, the name is empty or is only whitespace.\n", i)
+func lintStage(k string, v *Stage) {
+	if strings.TrimSpace(k) == "" {
+		log.Printf("On stage named %s, the name is empty or is only whitespace.\n", k)
 	}
 
 	if len(v.Command) == 0 {
-		log.Printf("On stage index %d, the command array has no members.\n", i)
+		log.Printf("On stage named %s, the command array has no members.\n", k)
 	} else {
 		if strings.Contains(v.Command[0], " ") {
-			log.Printf("On stage index %d, the first command element has a space. (It definitely won't work). Separate each argument as different members in the array.  \"make test --name=test\" becomes [\"make\", \"test\", \"--name\", \"test\"]\n", i)
+			log.Printf("On stage named %s, the first command element has a space. (It definitely won't work). Separate each argument as different members in the array.  \"make test --name=test\" becomes [\"make\", \"test\", \"--name\", \"test\"]\n", k)
 		}
 	}
 }
 
-func lintProject(i int, p *Project) {
-	if strings.TrimSpace(p.Name) == "" {
-		log.Printf("On project index %d, the name is empty or is only whitespace.\n", i)
+func lintProject(k string, p *Project) {
+	if strings.TrimSpace(k) == "" {
+		log.Printf("On project named %s, the name is empty or is only whitespace.\n", k)
 	}
 
 	if strings.TrimSpace(p.Path) == "" {
-		log.Printf("On project index %d, the name is empty or is only whitespace.\n", i)
+		log.Printf("On project named %s, the name is empty or is only whitespace.\n", k)
 	}
 
 	if p.Path[0] == '/' {
-		log.Printf("On project index %d, the path is absolute.\n", i)
+		log.Printf("On project named %s, the path is absolute.\n", k)
 	}
 
 	for ii, v := range p.Env {
 		if strings.Contains(v, "=") != true {
-			log.Printf("On project index %d, environment variable index %d, the environment variable does not contain a '='.\n", i, ii)
+			log.Printf("On project named %s, environment variable index %d, the environment variable does not contain a '='.\n", k, ii)
 		}
 	}
 
-	for ii, v := range p.Stages {
-		lintStage(ii, &v)
+	for k, v := range p.Stages {
+		lintStage(k, &v)
 	}
 }
 
 // The lint function will print warnings if the desired configuration has any possible issues.
 func lint(conf *Config) {
 	log.Printf("The following problems were found:\n")
-	for i, v := range conf.Stages {
-		lintStage(i, &v)
+	for k, v := range conf.Stages {
+		lintStage(k, &v)
 	}
 
-	for i, v := range conf.Projects {
-		lintProject(i, &v)
+	for k, v := range conf.Projects {
+		lintProject(k, &v)
 	}
 }
