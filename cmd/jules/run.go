@@ -21,43 +21,8 @@ import (
 	"strings"
 )
 
-func GetCommand(stage *Stage, project *Project, conf *Config) (*exec.Cmd, error) {
-	if stage == nil {
-		return nil, fmt.Errorf("You can not provide a nil stage.\n")
-	}
-	if project == nil {
-		return nil, fmt.Errorf("You can not provide a nil project.\n")
-	}
-	if conf == nil {
-		return nil, fmt.Errorf("You can not provide a nil config.\n")
-	}
-
-	var (
-		command []string
-	)
-	n := strings.ToLower(stage.Name)
-	for _, v := range project.Stages {
-		if strings.ToLower(v.Name) == n {
-			command = v.Command
-			break
-		}
-	}
-
-	if len(command) == 0 {
-		command = stage.Command
-	}
-
-	if len(command) == 0 {
-		return nil, fmt.Errorf("Could not find a suitable command. Please check your config file.\n")
-	}
-
-	cmd := exec.Command(command[0], command[1:]...)
-	cmd.Env = project.Env
-	cmd.Dir = project.Path
-	return cmd, nil
-}
-
-func GetCommandFromStrings(stage string, project string, conf *Config) (*exec.Cmd, error) {
+// GetCommand will return an "os/exec" command based on the stage, project, and configuration provided.
+func GetCommand(stage string, project string, conf *Config) (*exec.Cmd, error) {
 	if conf == nil {
 		return nil, fmt.Errorf("You can not provide a nil config.\n")
 	}

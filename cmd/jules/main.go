@@ -31,6 +31,36 @@ func execute(cmd *exec.Cmd) error {
 	return cmd.Run()
 }
 
+func runAll(conf *Config, args *Arguments) error {
+	projects := args.Projects
+
+	if len(args.Projects) == 0 {
+		projects = make([]string, len(conf.Projects))
+		for i, v := range conf.Projects {
+			projects[i] = v.Name
+		}
+	}
+
+	// For each stage defined in the configuration
+	for _, v := range conf.Stages {
+		log.Printf("Running stage %s.\n", v.Name)
+		for _, p := range projects {
+			log.Printf("Running stage %s on project %s.\n", v.Name, p)
+			cmd, err := GetCommand(v.Name, p, conf)
+			if err != nil {
+				return err
+			}
+
+			err = execute(cmd)
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func main() {
 	args := GetArguments()
 
@@ -53,40 +83,9 @@ func main() {
 	}
 
 	if args.Stage == "all" {
-		for _, v := range conf.Stages {
-			log.Printf("Running stage %s.\n", v.Name)
-
-			// The user did not specify any projects.
-			if len(args.Projects) == 0 {
-				for _, p := range conf.Projects {
-					log.Printf("Running stage %s on project %s.\n", v.Name, p.Name)
-					cmd, err := GetCommand(&v, &p, conf)
-					if err != nil {
-						log.Fatal(err.Error())
-					}
-
-					err = execute(cmd)
-
-					if err != nil {
-						log.Fatal(err.Error())
-					}
-				}
-			} else {
-				// Run all stages on specified projects
-				for _, p := range args.Projects {
-					log.Printf("Running stage %s on project %s.\n", v.Name, p)
-					cmd, err := GetCommandFromStrings(v.Name, p, conf)
-					if err != nil {
-						log.Fatal(err.Error())
-					}
-
-					err = execute(cmd)
-
-					if err != nil {
-						log.Fatal(err.Error())
-					}
-				}
-			}
+		err = runAll(conf, args)
+		if err != nil {
+			log.Fatal(err.Error())
 		}
 		return
 	}
@@ -94,7 +93,7 @@ func main() {
 	if len(args.Projects) != 0 {
 		for _, v := range args.Projects {
 			log.Printf("Running stage %s on project %s.\n", args.Stage, v)
-			cmd, err := GetCommandFromStrings(args.Stage, v, conf)
+			cmd, err := GetCommand(args.Stage, v, conf)
 			if err != nil {
 				log.Fatal(err.Error())
 			}
@@ -110,7 +109,7 @@ func main() {
 
 	for _, v := range conf.Projects {
 		log.Printf("Running stage %s on project %s.\n", args.Stage, v.Name)
-		cmd, err := GetCommandFromStrings(args.Stage, v.Name, conf)
+		cmd, err := GetCommand(args.Stage, v.Name, conf)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -121,5 +120,4 @@ func main() {
 			log.Fatal(err.Error())
 		}
 	}
-
 }
