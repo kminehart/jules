@@ -18,7 +18,6 @@ package main
 import (
 	"fmt"
 	"os/exec"
-	"strings"
 )
 
 // GetCommand will return an "os/exec" command based on the stage, project, and configuration provided.
@@ -29,41 +28,30 @@ func GetCommand(stage string, project string, conf *Config) (*exec.Cmd, error) {
 
 	var (
 		command []string
-		p       *Project
 	)
 
-	// Step 1:  See if the project has the stage.
-	project = strings.ToLower(project)
-	for i, v := range conf.Projects {
-		if strings.ToLower(v.Name) == project {
-			p = &conf.Projects[i]
-			for _, s := range v.Stages {
-				if s.Name == stage {
-					command = s.Command
-					break
-				}
-			}
-		}
+	if _, ok := conf.Projects[project]; ok != true {
+		return nil, fmt.Errorf("Project %s not found in the config.", project)
 	}
 
-	if p == nil {
-		return nil, fmt.Errorf("%s is not a project found in the provided config.", project)
+	// Step 1:  See if the project has the stage.
+	if val, ok := conf.Projects[project].Stages[stage]; ok {
+		command = val.Command
 	}
 
 	// The project didn't have the command
 	if len(command) == 0 {
-		for _, s := range conf.Stages {
-			if s.Name == stage {
-				command = s.Command
-			}
+		if val, ok := conf.Stages[stage]; ok {
+			command = val.Command
 		}
 	}
 
 	if len(command) == 0 {
 		return nil, fmt.Errorf("Could not find a suitable command. Please check your config file.\n")
 	}
+
 	cmd := exec.Command(command[0], command[1:]...)
-	cmd.Env = p.Env
-	cmd.Dir = p.Path
+	cmd.Env = conf.Projects[project].Env
+	cmd.Dir = conf.Projects[project].Path
 	return cmd, nil
 }
