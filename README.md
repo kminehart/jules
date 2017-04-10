@@ -1,7 +1,12 @@
 # jules
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/wehco/jules)](https://goreportcard.com/report/github.com/wehco/jules)
+
 A pretty basic build system for repositories with multiple projects.
 
 _for best results, use with Docker_
+
+Check out our [#](cookbook) for some detailed examples and how you can leverage Docker to speed up your build process!
 
 # Progress
 * [x] -config
