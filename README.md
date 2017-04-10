@@ -47,44 +47,42 @@ In the root of your repository:
 ```yaml
 # Each stage can be ran with 'jules -stage [STAGE]'
 stages:
-  - name: configure
+  configure:
     # The 'command' value can be configured with an array (like a Dockerfile)
     # Or with standard yaml syntax (below)
     command: ["make", "configure"]
-  - name: build
+  build:
     command: ["make", "build"]
-  - name: test
+  test:
     command: ["make", "test"]
-  - name: benchmark
+  benchmark:
     command: ["make", "benchmark"]
-  - name: deploy_staging
+  deploy_staging:
     command: ["make", "deploy_staging"]
-  - name: deploy_docker
+  deploy_docker:
     # Or you can just use normal yaml syntax
     command: 
       - make
       - deploy_docker
-  - name: deploy
+  deploy:
     command: ["make", "deploy"]
 
 # Each project will have these stages ran on it.
 projects:
-  - name: test1
+  test1:
     # Prefer relative paths to absolute paths.
     # I won't stop you from using absolute paths if you want to do that though.
     path: "path/to/project1"
-    # You can also tell jules to do something different for the defined stages for this project.
     stages:
-      - name: configure
-        command: ["npm", "configure"]
+      configure:
+        command: ["npm"]
     env:
       # This is technically a []string it just looks like a map.
       - ENV_PROJECT1=value
-  - name: test2
+  test2:
     path: "./path/to/project2"
     # Or JSON syntax.
-    env: ["ENV_PROJECT2=value"]
-```
+    env: ["ENV_PROJECT2=value"]```
 
 ### Step 2:  Configure your CI
 
@@ -124,7 +122,8 @@ test:
 deploy_staging:
   stage: deploy
   script:
-    - jules -stage=deploy -config=jules.staging.toml
+    - jules -stage=deploy_staging -config=jules.staging.toml
+    - jules -stage=deploy_docker -config=jules.staging.toml
   only:
     - development
 
@@ -139,22 +138,6 @@ deploy_production:
 ```
 
 ### Step 3: Start committing!
-
-# Commands
-
-```
-jules [all:default|configure|build|test|deploy]
-```
-
-Runs a defined stage.
-
-If no stage is defined, then `jules` will run all of the specified stages in the order listed in the config.
-
-If no config is specified, then `jules` will look for a `jules.toml`. 
-
-If a jules.toml exists, then it will run the specified stage on all of the projects listed.
-
-If `-project` is provided, then `jules` will run on the specified project(s).
 
 ```
 jules lint
