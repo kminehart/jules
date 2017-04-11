@@ -28,6 +28,8 @@ const (
 	defaultDiffs      = ""
 )
 
+const LogFormat = "%12s | %12s | %s\n"
+
 // ProjectList is a list of projects pulled from the config.
 type ProjectList map[string]Project
 
@@ -48,7 +50,6 @@ type Project struct {
 
 // The Config type defines the structure of the yaml configuration file.
 type Config struct {
-	Order    []string    `yaml:"order"`
 	Stages   StageList   `yaml:"stages"`
 	Projects ProjectList `yaml:"projects"`
 }

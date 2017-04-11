@@ -51,3 +51,51 @@ deploy_staging:
 deploy_docker:
   docker push
 ```
+
+And for your gitlab CI:
+
+```yml
+# Use the Debian Jessie image for that package manager
+# Ideally though you should use your own docker image so that npm, go, cmake, cargo, etc. don't have to be installed every time.
+image: jules:jessie-slim
+
+stages:
+  - configure
+  - build
+  - test
+  - deploy
+
+configure:
+  stage: configure
+  script:
+    - jules -stage configure
+    
+build:
+  stage: build
+  script:
+    - jules -stage build
+    
+test:
+  stage: test
+  script:
+    - jules -stage test
+
+# You can also specify a custom config file!
+deploy_staging:
+  stage: deploy
+  script:
+    - jules -stage=deploy_staging -config jules.staging.toml
+    - jules -stage=deploy_docker -config jules.staging.toml
+  only:
+    - development
+
+# Or you can run your custom command.
+deploy_production:
+  stage: deploy
+  script:
+    - jules -stage deploy
+    - jules -stage deploy_docker
+  only:
+    - master
+```
+

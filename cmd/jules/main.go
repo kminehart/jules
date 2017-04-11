@@ -19,17 +19,11 @@ import (
 	"flag"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 )
 
 func init() {
 	log.SetOutput(os.Stdout)
-}
-
-func execute(cmd *exec.Cmd) error {
-	cmd.Stdout = os.Stdout
-	return cmd.Run()
 }
 
 func run(stage string, projects []string, conf *Config, args *Arguments) error {
@@ -40,7 +34,7 @@ func run(stage string, projects []string, conf *Config, args *Arguments) error {
 			return err
 		}
 
-		err = execute(cmd)
+		err = ExecuteCommand(stage, p, cmd)
 		if err != nil {
 			return err
 		}
@@ -89,8 +83,8 @@ func main() {
 
 	// If the user provided the "-diffs" flag, find the projects with changes.
 	if args.Diffs != "" {
-		for i, v := range projects {
-			if val, ok := conf.Projects[v]; ok {
+		for i := len(projects) - 1; i >= 0; i-- {
+			if val, ok := conf.Projects[projects[i]]; ok {
 				isDifferent, err := ExecuteDiff(GetDiffCommand(val.Path, args.Diffs))
 				if err != nil {
 					log.Fatalf("Something went wrong when trying to git diff.  Do you have `git` installed? Error: %s\n", err.Error())
@@ -101,9 +95,7 @@ func main() {
 					if len(projects) == 1 {
 						log.Fatalf("No projects were found with diffs against the branch %s\n", args.Diffs)
 					}
-					// Remove thprojectst elemnet
-					projects[i] = projects[len(projects)-1]
-					projects = projects[:len(projects)-1]
+					projects = append(projects[:i], projects[i+1:]...)
 				}
 			}
 		}

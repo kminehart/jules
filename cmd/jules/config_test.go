@@ -16,48 +16,51 @@
 package main
 
 import (
+	"os"
 	"reflect"
 	"testing"
 )
 
 var testConfig = `
+# Each stage can be ran with 'jules -stage [STAGE]'
 stages:
-  - name: configure
+  configure:
     # The 'command' value can be configured with an array (like a Dockerfile)
     # Or with standard yaml syntax (below)
     command: ["make", "configure"]
-  - name: build
+  build:
     command: ["make", "build"]
-  - name: test
+  test:
     command: ["make", "test"]
-  - name: benchmark
+  benchmark:
     command: ["make", "benchmark"]
-  - name: deploy_staging
+  deploy_staging:
     command: ["make", "deploy_staging"]
-  - name: deploy_docker
+  deploy_docker:
     # Or you can just use normal yaml syntax
     command: 
       - make
       - deploy_docker
-  - name: deploy
+  deploy:
     command: ["make", "deploy"]
 
 # Each project will have these stages ran on it.
 projects:
-  - name: test1
+  test1:
     # Prefer relative paths to absolute paths.
     # I won't stop you from using absolute paths if you want to do that though.
     path: "path/to/project1"
     stages:
-      - name: configure
+      configure:
         command: ["npm", "configure"]
     env:
       # This is technically a []string it just looks like a map.
       - ENV_PROJECT1=value
-  - name: test2
+  test2:
     path: "./path/to/project2"
     # Or JSON syntax.
-    env: ["ENV_PROJECT2=value"]`
+    env: ["ENV_PROJECT2=value"]
+`
 
 func TestConfig(t *testing.T) {
 	c, err := ReadConfigString(testConfig)
@@ -66,64 +69,55 @@ func TestConfig(t *testing.T) {
 	}
 
 	validConfig := &Config{
-		Stages: []Stage{
-			{
-				Name: "configure",
+		Stages: StageList{
+			"configure": {
 				Command: []string{
 					"make",
 					"configure",
 				},
 			},
-			{
-				Name: "build",
+			"build": {
 				Command: []string{
 					"make",
 					"build",
 				},
 			},
-			{
-				Name: "test",
+			"test": {
 				Command: []string{
 					"make",
 					"test",
 				},
 			},
-			{
-				Name: "benchmark",
+			"benchmark": {
 				Command: []string{
 					"make",
 					"benchmark",
 				},
 			},
-			{
-				Name: "deploy_staging",
+			"deploy_staging": {
 				Command: []string{
 					"make",
 					"deploy_staging",
 				},
 			},
-			{
-				Name: "deploy_docker",
+			"deploy_docker": {
 				Command: []string{
 					"make",
 					"deploy_docker",
 				},
 			},
-			{
-				Name: "deploy",
+			"deploy": {
 				Command: []string{
 					"make",
 					"deploy",
 				},
 			},
 		},
-		Projects: []Project{
-			{
-				Name: "test1",
+		Projects: ProjectList{
+			"test1": {
 				Path: "path/to/project1",
-				Stages: []Stage{
-					{
-						Name: "configure",
+				Stages: StageList{
+					"configure": {
 						Command: []string{
 							"npm",
 							"configure",
@@ -134,8 +128,7 @@ func TestConfig(t *testing.T) {
 					"ENV_PROJECT1=value",
 				},
 			},
-			{
-				Name: "test2",
+			"test2": {
 				Path: "./path/to/project2",
 				Env: []string{
 					"ENV_PROJECT2=value",
@@ -146,5 +139,25 @@ func TestConfig(t *testing.T) {
 
 	if reflect.DeepEqual(*validConfig, *c) != true {
 		t.Errorf("%+v\n != %+v\n", *validConfig, *c)
+	}
+}
+
+func TestArgs(t *testing.T) {
+	os.Args = append(os.Args, []string{
+		"-projects",
+		"test1,test2",
+	}...)
+
+	args := GetArguments()
+	expect := &Arguments{
+		ConfigPath: "jules.yaml",
+		Projects: []string{
+			"test1",
+			"test2",
+		},
+	}
+
+	if reflect.DeepEqual(*args, *expect) != true {
+		t.Errorf("%+v\n != %+v\n", *args, *expect)
 	}
 }

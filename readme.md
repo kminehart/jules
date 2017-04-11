@@ -6,7 +6,7 @@ A pretty basic build system for repositories with multiple projects.
 
 _for best results, use with Docker_
 
-Check out our [cookbook](#cookbook) for some detailed examples and how you can leverage Docker to speed up your build process!
+Check out our [cookbook](#cookbook.md) for some detailed examples and how you can leverage Docker to speed up your build process!
 
 # Documentation
 
@@ -20,7 +20,7 @@ For detailed documentation on Jules, click [here](http://gojules.io/)
   * [x] Test environment variables
 * [x] -lint
 * [x] -help
-* [ ] -diff
+* [x] -diff
 
 # Install
 
@@ -82,19 +82,18 @@ projects:
   test2:
     path: "./path/to/project2"
     # Or JSON syntax.
-    env: ["ENV_PROJECT2=value"]```
+    env: ["ENV_PROJECT2=value"]
+```
 
 ### Step 2:  Configure your CI
 
-#### Travis CI
-```yml
-language: go
-```
+_I'm not familiar with Travis CI, so any extra contributions in this section are welcome._
 
 #### Gitlab CI
 
 ```yml
 # Use the Debian Jessie image for that package manager
+# Ideally though you should use your own docker image so that npm, go, cmake, cargo, etc. don't have to be installed every time.
 image: jules:jessie-slim
 
 stages:
@@ -106,24 +105,24 @@ stages:
 configure:
   stage: configure
   script:
-    - jules -stage=configure
+    - jules -stage configure
     
 build:
   stage: build
   script:
-    - jules -stage=build
+    - jules -stage build
     
 test:
   stage: test
   script:
-    - jules -stage=test
+    - jules -stage test
 
 # You can also specify a custom config file!
 deploy_staging:
   stage: deploy
   script:
-    - jules -stage=deploy_staging -config=jules.staging.toml
-    - jules -stage=deploy_docker -config=jules.staging.toml
+    - jules -stage deploy_staging -config jules.staging.toml
+    - jules -stage deploy_docker -config jules.staging.toml
   only:
     - development
 
@@ -131,8 +130,8 @@ deploy_staging:
 deploy_production:
   stage: deploy
   script:
-    - jules -stage=deploy
-    - jules -stage=deploy_docker
+    - jules -stage deploy
+    - jules -stage deploy_docker
   only:
     - master
 ```
