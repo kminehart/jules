@@ -12,21 +12,13 @@ Check out our [cookbook](#cookbook.md) for some detailed examples and how you ca
 
 For detailed documentation on Jules, click [here](http://gojules.io/)
 
-# Progress
-* [x] -config
-* [x] -stage
-  * [x] Custom stages in project file.
-  * [x] Execute the script specified.
-  * [x] Test environment variables
-* [x] -lint
-* [x] -help
-* [x] -diff
-
 # Install
 
 ```
 go get github.com/kminehart/jules/cmd/jules
 ```
+
+Or download the (Linux) binary from our [releases](https://github.com/kminehart/jules/releases).
 
 # Usage
 
