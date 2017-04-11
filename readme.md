@@ -1,8 +1,6 @@
 # jules
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/kminehart/jules)](https://goreportcard.com/report/github.com/kminehart/jules)
-
-[![Build Status](https://travis-ci.org/kminehart/jules.svg?branch=master)](https://travis-ci.org/kminehart/jules)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kminehart/jules)](https://goreportcard.com/report/github.com/kminehart/jules) [![Build Status](https://travis-ci.org/kminehart/jules.svg?branch=master)](https://travis-ci.org/kminehart/jules)
 
 A pretty basic build system for repositories with multiple projects.
 
