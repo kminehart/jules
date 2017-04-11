@@ -20,7 +20,7 @@ For detailed documentation on Jules, click [here](http://gojules.io/)
   * [x] Test environment variables
 * [x] -lint
 * [x] -help
-* [ ] -diff
+* [x] -diff
 
 # Install
 
@@ -87,11 +87,7 @@ projects:
 
 ### Step 2:  Configure your CI
 
-#### Travis CI
-
-```yml
-language: go
-```
+_I'm not familiar with Travis CI, so any extra contributions in this section are welcome._
 
 #### Gitlab CI
 
@@ -109,24 +105,24 @@ stages:
 configure:
   stage: configure
   script:
-    - jules -stage=configure
+    - jules -stage configure
     
 build:
   stage: build
   script:
-    - jules -stage=build
+    - jules -stage build
     
 test:
   stage: test
   script:
-    - jules -stage=test
+    - jules -stage test
 
 # You can also specify a custom config file!
 deploy_staging:
   stage: deploy
   script:
-    - jules -stage=deploy_staging -config=jules.staging.toml
-    - jules -stage=deploy_docker -config=jules.staging.toml
+    - jules -stage deploy_staging -config jules.staging.toml
+    - jules -stage deploy_docker -config jules.staging.toml
   only:
     - development
 
@@ -134,8 +130,8 @@ deploy_staging:
 deploy_production:
   stage: deploy
   script:
-    - jules -stage=deploy
-    - jules -stage=deploy_docker
+    - jules -stage deploy
+    - jules -stage deploy_docker
   only:
     - master
 ```
