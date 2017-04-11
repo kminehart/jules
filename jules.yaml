@@ -1,38 +1,38 @@
 # Each stage can be ran with 'jules -stage [STAGE]'
 stages:
-  - name: configure
+  configure:
     # The 'command' value can be configured with an array (like a Dockerfile)
     # Or with standard yaml syntax (below)
     command: ["make", "configure"]
-  - name: build
+  build:
     command: ["make", "build"]
-  - name: test
+  test:
     command: ["make", "test"]
-  - name: benchmark
+  benchmark:
     command: ["make", "benchmark"]
-  - name: deploy_staging
+  deploy_staging:
     command: ["make", "deploy_staging"]
-  - name: deploy_docker
+  deploy_docker:
     # Or you can just use normal yaml syntax
     command: 
       - make
       - deploy_docker
-  - name: deploy
+  deploy:
     command: ["make", "deploy"]
 
 # Each project will have these stages ran on it.
 projects:
-  - name: test1
+  test1:
     # Prefer relative paths to absolute paths.
     # I won't stop you from using absolute paths if you want to do that though.
     path: "path/to/project1"
     stages:
-      - name: configure
+      configure:
         command: ["npm"]
     env:
       # This is technically a []string it just looks like a map.
       - ENV_PROJECT1=value
-  - name: test2
+  test2:
     path: "./path/to/project2"
     # Or JSON syntax.
     env: ["ENV_PROJECT2=value"]
