@@ -16,9 +16,21 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"os/exec"
+	"strings"
 )
+
+func ExecuteCommand(stage string, project string, cmd *exec.Cmd) error {
+	var buff bytes.Buffer
+
+	cmd.Stdout = &buff
+	err := cmd.Run()
+	log.Printf(LogFormat, stage, project, buff.String())
+	return err
+}
 
 // GetCommand will return an "os/exec" command based on the stage, project, and configuration provided.
 func GetCommand(stage string, project string, conf *Config) (*exec.Cmd, error) {
@@ -53,5 +65,7 @@ func GetCommand(stage string, project string, conf *Config) (*exec.Cmd, error) {
 	cmd := exec.Command(command[0], command[1:]...)
 	cmd.Env = conf.Projects[project].Env
 	cmd.Dir = conf.Projects[project].Path
+
+	log.Printf(LogFormat, project, stage, strings.Join(cmd.Args, " "))
 	return cmd, nil
 }

@@ -19,17 +19,11 @@ import (
 	"flag"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 )
 
 func init() {
 	log.SetOutput(os.Stdout)
-}
-
-func execute(cmd *exec.Cmd) error {
-	cmd.Stdout = os.Stdout
-	return cmd.Run()
 }
 
 func run(stage string, projects []string, conf *Config, args *Arguments) error {
@@ -40,7 +34,7 @@ func run(stage string, projects []string, conf *Config, args *Arguments) error {
 			return err
 		}
 
-		err = execute(cmd)
+		err = ExecuteCommand(stage, p, cmd)
 		if err != nil {
 			return err
 		}

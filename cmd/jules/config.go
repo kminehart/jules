@@ -28,6 +28,8 @@ const (
 	defaultDiffs      = ""
 )
 
+const LogFormat = "%12s | %12s | %s\n"
+
 // ProjectList is a list of projects pulled from the config.
 type ProjectList map[string]Project
 
