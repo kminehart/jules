@@ -1,0 +1,6 @@
+language: go
+  
+install:
+  - go get github.com/go-yaml/yaml
+  
+script: go test ./cmd/jules
