@@ -20,57 +20,80 @@ import (
 	"testing"
 )
 
-var runConfig = `
-# Each stage can be ran with 'jules -stage [STAGE]'
-stages:
-  - name: configure
-    # The 'command' value can be configured with an array (like a Dockerfile)
-    # Or with standard yaml syntax (below)
-    command: ["make", "configure"]
-  - name: build
-    command: ["make", "build"]
-  - name: test
-    command: ["make", "test"]
-  - name: benchmark
-    command: ["make", "benchmark"]
-  - name: deploy_staging
-    command: ["make", "deploy_staging"]
-  - name: deploy_docker
-    # Or you can just use normal yaml syntax
-    command: 
-      - make
-      - deploy_docker
-  - name: deploy
-    command: ["make", "deploy"]
-
-# Each project will have these stages ran on it.
-projects:
-  - name: test1
-    # Prefer relative paths to absolute paths.
-    # I won't stop you from using absolute paths if you want to do that though.
-    path: "path/to/project1"
-    stages:
-      - name: configure
-        command: ["npm", "configure"]
-    env:
-      # This is technically a []string it just looks like a map.
-      - ENV_PROJECT1=value
-  - name: test2
-    path: "./path/to/project2"
-    # Or JSON syntax.
-    env: ["ENV_PROJECT2=value"]`
-
 func TestRun(t *testing.T) {
 	// Run a stage
 
-	conf, err := ReadConfigString(runConfig)
-
-	if err != nil {
-		t.Error(err)
+	conf := &Config{
+		Stages: StageList{
+			"configure": {
+				Command: []string{
+					"make",
+					"configure",
+				},
+			},
+			"build": {
+				Command: []string{
+					"make",
+					"build",
+				},
+			},
+			"test": {
+				Command: []string{
+					"make",
+					"test",
+				},
+			},
+			"benchmark": {
+				Command: []string{
+					"make",
+					"benchmark",
+				},
+			},
+			"deploy_staging": {
+				Command: []string{
+					"make",
+					"deploy_staging",
+				},
+			},
+			"deploy_docker": {
+				Command: []string{
+					"make",
+					"deploy_docker",
+				},
+			},
+			"deploy": {
+				Command: []string{
+					"make",
+					"deploy",
+				},
+			},
+		},
+		Projects: ProjectList{
+			"test1": {
+				Path: "path/to/project1",
+				Stages: StageList{
+					"configure": {
+						Command: []string{
+							"npm",
+							"configure",
+						},
+					},
+				},
+				Env: []string{
+					"ENV_PROJECT1=value",
+				},
+			},
+			"test2": {
+				Path: "./path/to/project2",
+				Env: []string{
+					"ENV_PROJECT2=value",
+				},
+			},
+		},
 	}
 
 	// stage, project, config
-	cmd, err := GetCommandFromStrings("test", "test1", conf)
+	cmd, err := GetCommand("test", "test1", conf)
 
 	if err != nil {
 		t.Error(err)
@@ -87,7 +110,7 @@ func TestRun(t *testing.T) {
 	}
 
 	// This project overrides a stage
-	cmd, err = GetCommandFromStrings("configure", "test1", conf)
+	cmd, err = GetCommand("configure", "test1", conf)
 	path, _ = exec.LookPath("npm")
 	if cmd.Path != path {
 		t.Errorf("%s != %s", cmd.Path, path)
@@ -97,19 +120,19 @@ func TestRun(t *testing.T) {
 	}
 
 	// A project that doesn't exist
-	cmd, err = GetCommandFromStrings("test", "non_existent", conf)
+	cmd, err = GetCommand("test", "non_existent", conf)
 	if err == nil {
 		t.Fail()
 	}
 
 	// A stage that doesn't exist
-	cmd, err = GetCommandFromStrings("non_existent", "test1", conf)
+	cmd, err = GetCommand("non_existent", "test1", conf)
 	if err == nil {
 		t.Fail()
 	}
 
 	// A nil config
-	cmd, err = GetCommandFromStrings("build", "test1", nil)
+	cmd, err = GetCommand("build", "test1", nil)
 	if err == nil {
 		t.Fail()
 	}

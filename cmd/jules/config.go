@@ -48,7 +48,6 @@ type Project struct {
 
 // The Config type defines the structure of the yaml configuration file.
 type Config struct {
-	Order    []string    `yaml:"order"`
 	Stages   StageList   `yaml:"stages"`
 	Projects ProjectList `yaml:"projects"`
 }
