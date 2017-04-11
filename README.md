@@ -82,11 +82,13 @@ projects:
   test2:
     path: "./path/to/project2"
     # Or JSON syntax.
-    env: ["ENV_PROJECT2=value"]```
+    env: ["ENV_PROJECT2=value"]
+```
 
 ### Step 2:  Configure your CI
 
 #### Travis CI
+
 ```yml
 language: go
 ```
@@ -95,6 +97,7 @@ language: go
 
 ```yml
 # Use the Debian Jessie image for that package manager
+# Ideally though you should use your own docker image so that npm, go, cmake, cargo, etc. don't have to be installed every time.
 image: jules:jessie-slim
 
 stages:
