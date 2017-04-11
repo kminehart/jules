@@ -6,7 +6,7 @@ A pretty basic build system for repositories with multiple projects.
 
 _for best results, use with Docker_
 
-Check out our [cookbook](#cookbook) for some detailed examples and how you can leverage Docker to speed up your build process!
+Check out our [cookbook](#cookbook.md) for some detailed examples and how you can leverage Docker to speed up your build process!
 
 # Documentation
 
