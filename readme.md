@@ -174,3 +174,6 @@ If ran in a valid `git` repository, `jules` will only run the specified stage on
 ```
 
 The full GPLv3 can be read [here](LICENSE).
+
+# Credits
+Thank you [zikes](https://github.com/zikes) for the [multistatus](https://github.com/zikes/multistatus) library.
