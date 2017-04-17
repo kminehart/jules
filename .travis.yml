@@ -2,5 +2,6 @@ language: go
   
 install:
   - go get github.com/go-yaml/yaml
+  - go get github.com/zikes/multistatus
   
 script: go test ./cmd/jules
