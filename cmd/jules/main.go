@@ -16,10 +16,15 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"flag"
+	"fmt"
+	"github.com/zikes/multistatus"
 	"log"
 	"os"
 	"strings"
+	"sync"
 )
 
 func init() {
@@ -27,34 +32,61 @@ func init() {
 }
 
 func run(stage string, projects []string, conf *Config, args *Arguments) error {
+	workerSet := multistatus.New()
+	errors := map[string]error{}
+	mutex := &sync.Mutex{}
 	for _, p := range projects {
-		cmd, err := GetCommand(stage, p, conf)
+		worker := workerSet.Add(fmt.Sprintf("Project: %s", p))
+		go func(w *multistatus.Worker, project string) {
+			cmd, err := GetCommand(stage, project, conf)
 
-		if err != nil {
-			return err
-		}
+			if err != nil {
+				mutex.Lock()
+				errors[project] = err
+				mutex.Unlock()
+				w.Fail()
+			}
 
-		err = ExecuteCommand(stage, p, cmd)
-		if err != nil {
-			return err
-		}
+			var buff bytes.Buffer
+			err = ExecuteCommand(stage, project, &buff, cmd)
+
+			if err != nil {
+				mutex.Lock()
+				errors[project] = err
+				mutex.Unlock()
+				w.Fail()
+			}
+
+			w.Done()
+		}(worker, p)
 	}
-
+	// Print the WorkerSet's status until all Workers have completed
+	workerSet.Print(context.Background())
+	mutex.Lock()
+	if len(errors) != 0 {
+		for project, err := range errors {
+			log.Printf("Error with project %s:\n%s", project, err.Error())
+		}
+		os.Exit(1)
+	}
+	mutex.Unlock()
 	return nil
 }
 
 func main() {
 	args := GetArguments()
 
+	// * Assemble a list of map[string]map[string] based on config.
 	conf, err := ReadConfig(args.ConfigPath)
-
-	if args.Stage == "" {
-		flag.Usage()
-		return
-	}
 
 	if err != nil {
 		log.Fatal(err.Error())
+	}
+
+	// If the user did not specify a stage, then show the usage.
+	if args.Stage == "" {
+		flag.Usage()
+		return
 	}
 
 	// Lint?
@@ -69,7 +101,14 @@ func main() {
 		}
 	}
 
-	projects := args.Projects
+	// * Create an array of projects to be run based on the arguments
+	var (
+		projects []string
+		stage    string
+	)
+
+	projects = args.Projects
+	stage = args.Stage
 
 	// If no projects were specified, then use all of them
 	if len(args.Projects) == 0 {
@@ -81,27 +120,7 @@ func main() {
 		}
 	}
 
-	// If the user provided the "-diffs" flag, find the projects with changes.
-	if args.Diffs != "" {
-		for i := len(projects) - 1; i >= 0; i-- {
-			if val, ok := conf.Projects[projects[i]]; ok {
-				isDifferent, err := ExecuteDiff(GetDiffCommand(val.Path, args.Diffs))
-				if err != nil {
-					log.Fatalf("Something went wrong when trying to git diff.  Do you have `git` installed? Error: %s\n", err.Error())
-				}
-
-				// If there was no diff found for this project.
-				if isDifferent != true {
-					if len(projects) == 1 {
-						log.Fatalf("No projects were found with diffs against the branch %s\n", args.Diffs)
-					}
-					projects = append(projects[:i], projects[i+1:]...)
-				}
-			}
-		}
-	}
-
-	err = run(args.Stage, projects, conf, args)
+	err = run(stage, projects, conf, args)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

@@ -16,19 +16,14 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"log"
+	"io"
 	"os/exec"
-	"strings"
 )
 
-func ExecuteCommand(stage string, project string, cmd *exec.Cmd) error {
-	var buff bytes.Buffer
-
-	cmd.Stdout = &buff
+func ExecuteCommand(stage string, project string, out io.Writer, cmd *exec.Cmd) error {
+	cmd.Stdout = out
 	err := cmd.Run()
-	log.Printf(LogFormat, stage, project, buff.String())
 	return err
 }
 
@@ -66,6 +61,5 @@ func GetCommand(stage string, project string, conf *Config) (*exec.Cmd, error) {
 	cmd.Env = conf.Projects[project].Env
 	cmd.Dir = conf.Projects[project].Path
 
-	log.Printf(LogFormat, project, stage, strings.Join(cmd.Args, " "))
 	return cmd, nil
 }
