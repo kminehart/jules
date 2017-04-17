@@ -146,12 +146,15 @@ jules -stage=[STAGE]  -config=[CONFIG]
 jules -stage=[STAGE] -project=[PROJECT1,PROJECT2...]
 ```
 
-~~`jules` will run the command on the specified project(s).~~
-_this command has been removed in 0.2.0.  Expect it to return eventually._
+`jules` will run the command on the specified project(s).
+
 ```
 jules -stage=[STAGE] -diffs origin/master
 ```
-If ran in a valid `git` repository, `jules` will only run the specified stage on projects that were modified in the last commit. 
+
+~~If ran in a valid `git` repository, `jules` will only run the specified stage on projects that were modified in the last commit~~
+
+_this command has been removed in 0.2.0.  Expect it to return eventually._
 
 # License
 
