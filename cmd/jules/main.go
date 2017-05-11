@@ -56,6 +56,7 @@ func run(stage string, projects []string, conf *Config, args *Arguments) error {
 				errors[project] = err
 				mutex.Unlock()
 				w.Fail()
+				log.Println(string(buff))
 				return
 			}
 
