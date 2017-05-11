@@ -23,6 +23,7 @@ import (
 
 func ExecuteCommand(stage string, project string, out io.Writer, cmd *exec.Cmd) error {
 	cmd.Stdout = out
+	cmd.Stderr = out
 	err := cmd.Run()
 	return err
 }
