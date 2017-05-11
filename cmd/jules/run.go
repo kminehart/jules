@@ -18,6 +18,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 )
 
@@ -59,7 +60,7 @@ func GetCommand(stage string, project string, conf *Config) (*exec.Cmd, error) {
 	}
 
 	cmd := exec.Command(command[0], command[1:]...)
-	cmd.Env = conf.Projects[project].Env
+	cmd.Env = append(os.Environ(), conf.Projects[project].Env...)
 	cmd.Dir = conf.Projects[project].Path
 
 	return cmd, nil
