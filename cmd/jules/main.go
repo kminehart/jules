@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/zikes/multistatus"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -49,7 +50,9 @@ func run(stage string, projects []string, conf *Config, args *Arguments) error {
 			}
 
 			var buff bytes.Buffer
-			err = ExecuteCommand(stage, project, &buff, cmd)
+			writer := io.MultiWriter(&buff, os.Stderr)
+
+			err = ExecuteCommand(stage, project, writer, cmd)
 
 			if err != nil {
 				mutex.Lock()
