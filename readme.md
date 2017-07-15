@@ -30,6 +30,20 @@ To run a stage, run `jules -stage=[COMMAND]`:
 
 For a list of commands, see [#commands](#commands).
 
+# Configuration options
+
+* [ ] Create multiple projects, designated by file location & name
+* [ ] Allow each project to be ran by a designated docker image
+* [ ] Allow each project to be ran alongside services (designated by docker image)
+  * [ ] Configure each service with environment variables / command
+  * [ ] Allow configuration of the hostname
+  * [ ] Allow services to only be ran for specific stages
+* [ ] Specify stages for testing (Test, build, deploy, etc)
+* [ ] Specify environment variables to pass to the build
+* [ ] Specify gloabl environment variables to pass to all builds
+* [ ] Specify a global to run for a stage
+* [ ] Specify a command to run for a specific stage for a specific project
+
 ### Step 1:  Configure your project
 
 In the root of your repository:
@@ -62,6 +76,8 @@ stages:
 # Each project will have these stages ran on it.
 projects:
   test1:
+    # Specify the docker image to use with this project
+    image: "node:8-alpine"
     # Prefer relative paths to absolute paths.
     # I won't stop you from using absolute paths if you want to do that though.
     path: "path/to/project1"
@@ -72,7 +88,18 @@ projects:
       # This is technically a []string it just looks like a map.
       - ENV_PROJECT1=value
   test2:
-    path: "./path/to/project2"
+    # Specifying services (like a database) will spin up these services for the specific stages before running the command (or all stages if none are specified)
+    services:
+      - postgres:
+          image: "postgres:10-alpine"
+          env:
+            - "POSTGRES_PASSWORD=postgres"
+            - "POSTGRES_USER=postgres"
+            - "POSTGRES_DB=test"
+          only:
+            - "test"
+    image: "golang:1.8-alpine"
+    path: "./path/to/golang/project"
     # Or JSON syntax.
     env: ["ENV_PROJECT2=value"]
 ```
