@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with "jules".  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package config
 
 import (
 	"flag"
@@ -35,16 +35,29 @@ type ProjectList map[string]Project
 // StageList is a list of stages pulled from the config.
 type StageList map[string]Stage
 
+// ServiceList is a simple list of services to run along side the docker run for that stage
+type ServiceList map[string]Service
+
 // Stage is a single stage defined in the config.  A stage basically runs a command on your projects.
 type Stage struct {
 	Command []string `yaml:"command"`
 }
 
+// A service is a docker container that runs alongside the specified stages
+type Service struct {
+	Image   string   `yaml:"image"`
+	Env     []string `yaml:"env"`
+	Only    []string `yaml:"only"`
+	Command []string `yaml:"command"`
+}
+
 // Project is essentially a filepath where a stage command is run.
 type Project struct {
-	Path   string    `yaml:"path"`
-	Stages StageList `yaml:"stages"`
-	Env    []string  `yaml:"env"`
+	Image    string      `yaml:"image"`
+	Path     string      `yaml:"path"`
+	Stages   StageList   `yaml:"stages"`
+	Services ServiceList `yaml:"services"`
+	Env      []string    `yaml:"env"`
 }
 
 // The Config type defines the structure of the yaml configuration file.

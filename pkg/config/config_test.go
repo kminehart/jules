@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with "jules".  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package config
 
 import (
 	"os"
@@ -47,6 +47,8 @@ stages:
 # Each project will have these stages ran on it.
 projects:
   test1:
+    # Specify the docker image to use with this project
+    image: "node:8-alpine"
     # Prefer relative paths to absolute paths.
     # I won't stop you from using absolute paths if you want to do that though.
     path: "path/to/project1"
@@ -57,7 +59,18 @@ projects:
       # This is technically a []string it just looks like a map.
       - ENV_PROJECT1=value
   test2:
-    path: "./path/to/project2"
+    # Specifying services (like a database) will spin up these services for the specific stages before running the command (or all stages if none are specified)
+    services:
+      postgres:
+        image: "postgres:10-alpine"
+        env:
+          - "POSTGRES_PASSWORD=postgres"
+          - "POSTGRES_USER=postgres"
+          - "POSTGRES_DB=test"
+        only:
+          - "test"
+    image: "golang:1.8-alpine"
+    path: "./path/to/golang/project"
     # Or JSON syntax.
     env: ["ENV_PROJECT2=value"]
 `
@@ -65,8 +78,10 @@ projects:
 func TestConfig(t *testing.T) {
 	c, err := ReadConfigString(testConfig)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
+
+	t.Logf("Received config: %+v", c)
 
 	validConfig := &Config{
 		Stages: StageList{
@@ -115,7 +130,8 @@ func TestConfig(t *testing.T) {
 		},
 		Projects: ProjectList{
 			"test1": {
-				Path: "path/to/project1",
+				Image: "node:8-alpine",
+				Path:  "path/to/project1",
 				Stages: StageList{
 					"configure": {
 						Command: []string{
@@ -129,7 +145,21 @@ func TestConfig(t *testing.T) {
 				},
 			},
 			"test2": {
-				Path: "./path/to/project2",
+				Image: "golang:1.8-alpine",
+				Path:  "./path/to/golang/project",
+				Services: ServiceList{
+					"postgres": Service{
+						Image: "postgres:10-alpine",
+						Env: []string{
+							"POSTGRES_PASSWORD=postgres",
+							"POSTGRES_USER=postgres",
+							"POSTGRES_DB=test",
+						},
+						Only: []string{
+							"test",
+						},
+					},
+				},
 				Env: []string{
 					"ENV_PROJECT2=value",
 				},
@@ -138,7 +168,7 @@ func TestConfig(t *testing.T) {
 	}
 
 	if reflect.DeepEqual(*validConfig, *c) != true {
-		t.Errorf("%+v\n != %+v\n", *validConfig, *c)
+		t.Errorf("Expected:\n%+v\nReceived:\n%+v\n", *validConfig, *c)
 	}
 }
 
