@@ -25,7 +25,6 @@ import (
 
 const (
 	defaultConfigPath = "jules.yaml"
-	defaultDiffs      = ""
 )
 
 const LogFormat = "%12s | %12s | %s\n"
@@ -57,7 +56,6 @@ type Config struct {
 // Arguments are arguments passed to the binary.
 type Arguments struct {
 	ConfigPath string
-	Diffs      string
 	Stage      string
 	Projects   []string
 }
@@ -67,14 +65,12 @@ func GetArguments() *Arguments {
 	// Command-line Arguments
 	var (
 		configPath string // -config
-		diffs      string // -diffs
 		stage      string
 		projects   []string
 	)
 
 	flag.StringVar(&stage, "stage", "", "Runs a stage.")
 	flag.StringVar(&configPath, "config", defaultConfigPath, "-config will specify a custom config file.")
-	flag.StringVar(&diffs, "diffs", defaultDiffs, "If in a valid git repository, -diffs [branch] will run a stage only on projects that have been changed when compared to the specified branch.")
 	var p string
 	flag.StringVar(&p, "projects", "", "Run the specified stage on a comma deliminated list of projects. (ex: -project project1,project2,project3)")
 	flag.Parse()
@@ -85,7 +81,6 @@ func GetArguments() *Arguments {
 
 	return &Arguments{
 		ConfigPath: configPath,
-		Diffs:      diffs,
 		Stage:      stage,
 		Projects:   projects,
 	}
