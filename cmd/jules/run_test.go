@@ -105,8 +105,15 @@ func TestRun(t *testing.T) {
 		t.Errorf("%s != %s", cmd.Path, path)
 	}
 
-	if cmd.Env[0] != "ENV_PROJECT1=value" {
-		t.Errorf("cmd for %s on %s did not have the correct environment variable. Got %s, wanted %s.", "test", "test1", cmd.Env[0], "ENV_PROJECT1=value")
+	contains := false
+	for _, v := range cmd.Env {
+		if v == "ENV_PROJECT1=value" {
+			contains = true
+		}
+	}
+
+	if contains != true {
+		t.Errorf("cmd for %s on %s did not have the correct environment variable. Environment variables %+v should contain  %s.", "test", "test1", cmd.Env, "ENV_PROJECT1=value")
 	}
 
 	// This project overrides a stage
