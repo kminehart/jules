@@ -113,7 +113,7 @@ _I'm not familiar with Travis CI, so any extra contributions in this section are
 ```yml
 # Use the Debian Jessie image for that package manager
 # Ideally though you should use your own docker image so that npm, go, cmake, cargo, etc. don't have to be installed every time.
-image: jules:jessie-slim
+image: jules:1.0
 
 stages:
   - configure
