@@ -17,34 +17,36 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"flag"
 	"fmt"
-	"github.com/zikes/multistatus"
 	"log"
 	"os"
 	"strings"
 	"sync"
 )
 
+var PrintFormat = "%-32s | %s"
+
 func init() {
 	log.SetOutput(os.Stdout)
 }
 
 func run(stage string, projects []string, conf *Config, args *Arguments) error {
-	workerSet := multistatus.New()
-	errors := map[string]error{}
+	wg := &sync.WaitGroup{}
 	mutex := &sync.Mutex{}
+
+	errors := map[string]error{}
 	for _, p := range projects {
-		worker := workerSet.Add(fmt.Sprintf("Project: %s", p))
-		go func(w *multistatus.Worker, project string) {
+		wg.Add(1)
+		go func(project string) {
+			defer wg.Done()
 			cmd, err := GetCommand(stage, project, conf)
 
+			log.Println(PrintFormat, project, fmt.Sprintf("Running stage '%s'", stage))
 			if err != nil {
 				mutex.Lock()
 				errors[project] = err
 				mutex.Unlock()
-				w.Fail()
 				return
 			}
 
@@ -55,24 +57,21 @@ func run(stage string, projects []string, conf *Config, args *Arguments) error {
 				mutex.Lock()
 				errors[project] = err
 				mutex.Unlock()
-				w.Fail()
 				log.Println(buff.String())
 				return
 			}
-
-			w.Done()
-		}(worker, p)
+			log.Println(PrintFormat, buff.String())
+		}(p)
 	}
-	// Print the WorkerSet's status until all Workers have completed
-	workerSet.Print(context.Background())
-	mutex.Lock()
+
+	wg.Wait()
+
 	if len(errors) != 0 {
 		for project, err := range errors {
 			log.Printf("Error with project %s:\n%s", project, err.Error())
 		}
 		os.Exit(1)
 	}
-	mutex.Unlock()
 	return nil
 }
 
